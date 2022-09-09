@@ -79,6 +79,28 @@ int code(int snowflake[]) {
 }
 
 
+// Intricate hash table design
+#define hashsize(n) ((unsigned long)1 << (n))  // 2^n
+#define hashmask(n) (hashsize(n) - 1)  // 2^n - 1
+
+unsigned long oaat(char *key, unsigned long len, unsigned long bits) {
+    unsigned long hash, i;
+
+    // This is the one-at-a-time hash function by Bob Jenkins
+    for (hash = i = 0; i < len; ++i) {
+        hash += key[i];  // Add the next character to the hash
+        hash += (hash << 10);  // Multiply by 2^10
+        hash ^= (hash >> 6);  // XOR with 2^6
+    }
+
+    // Finalize the hash
+    hash += (hash << 3);  // Multiply by 2^3  
+    hash ^= (hash >> 11);  // XOR with 2^11
+    hash += (hash << 15);  // Multiply by 2^15
+    return hash & hashmask(bits);  // Return the hash
+}
+
+
 int main(void) {
     static snowflake_node *snowflakes[SIZE] = {NULL};
     snowflake_node *snow;
@@ -98,5 +120,14 @@ int main(void) {
         snowflakes[snowflake_code] = snow;
     }
     identify_identical(snowflakes);
+
+    // // long snowflake[] = {1, 2, 3, 4, 5, 6};
+    // long snowflake[] = {2, 2, 3, 4, 5, 6};
+
+    // // 2^17 = 131072 is the smallest power of 2 that is greater than 100000
+    // unsigned long code = oaat((char *)snowflake, sizeof(snowflake), 17);
+    // printf("%lu\n", code);
+    
     return 0;
 }
+
